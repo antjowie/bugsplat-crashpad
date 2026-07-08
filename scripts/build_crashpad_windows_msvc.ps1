@@ -14,16 +14,17 @@ if (-not (Test-Path "crashpad")) {
     Set-Location -Path "crashpad"
     git checkout main
     git pull
-    gclient sync
 }
+git checkout 7ab18af
+gclient sync -D --force --reset
 
 # Generate build files with GN for Debug configuration
 Write-Host "Generating Debug build files with GN..."
-gn gen out/win-debug --args="extra_cflags=\`"/MDd\`" is_debug=true" 
+gn gen out/win-debug --args="extra_cflags=\`"/MTd\`" is_debug=true" 
 
 # Generate build files with GN for Release configuration
 Write-Host "Generating Release build files with GN..."
-gn gen out/win-release --args="extra_cflags=\`"/MD\`" is_debug=false" 
+gn gen out/win-release --args="extra_cflags=\`"/MT\`" is_debug=false" 
 
 # Build Debug
 Write-Host "Building Debug with Ninja..."

@@ -1,9 +1,9 @@
 name: Monthly Crashpad Build
 
 on:
-  schedule:
-    # Run on the 1st of every month at 2:00 AM UTC
-    - cron: "0 2 1 * *"
+  # schedule:
+  # Run on the 1st of every month at 2:00 AM UTC
+  # - cron: "0 2 1 * *"
   workflow_dispatch: # Allow manual triggering
 
 jobs:
@@ -15,14 +15,14 @@ jobs:
             platform: windows
             script: scripts/build_crashpad_windows_msvc.ps1
             artifact_path: third_party/crashpad/out/win-debug
-          - os: macos-latest
-            platform: macos
-            script: scripts/build_crashpad_macos.sh
-            artifact_path: third_party/crashpad/out/macos-debug
-          - os: ubuntu-latest
-            platform: linux
-            script: scripts/build_crashpad_linux.sh
-            artifact_path: third_party/crashpad/out/linux-debug
+          # - os: macos-latest
+          #   platform: macos
+          #   script: scripts/build_crashpad_macos.sh
+          #   artifact_path: third_party/crashpad/out/macos-debug
+          # - os: ubuntu-latest
+          #   platform: linux
+          #   script: scripts/build_crashpad_linux.sh
+          #   artifact_path: third_party/crashpad/out/linux-debug
 
     runs-on: ${{ matrix.os }}
     name: Build Crashpad on ${{ matrix.platform }}
@@ -99,7 +99,7 @@ jobs:
 
           # Set platform-specific paths
           CRASHPAD_ROOT="third_party/crashpad"
-          
+
           # Set debug and release output directories
           if [ "${{ matrix.platform }}" == "windows" ]; then
             DEBUG_OUT_DIR="third_party/crashpad/out/win-debug"
@@ -212,7 +212,7 @@ jobs:
           git clone https://chromium.googlesource.com/chromium/tools/depot_tools.git
           export PATH="$PWD/depot_tools:$PATH"
           mkdir -p temp-crashpad && cd temp-crashpad
-          fetch --no-history crashpad
+          fetch crashpad
           cd crashpad
           CRASHPAD_COMMIT=$(git rev-parse --short HEAD)
           CRASHPAD_DATE=$(git show -s --format=%ci HEAD | cut -d' ' -f1 | tr -d '-')
@@ -247,20 +247,20 @@ jobs:
           name: Crashpad Build ${{ steps.crashpad-version.outputs.version }}
           body: |
             ## Crashpad Libraries - ${{ steps.crashpad-version.outputs.version }}
-            
+
             Ready-to-use Crashpad libraries for all platforms, built from the latest Crashpad source.
-            
+
             ### Quick Start
             1. Download the archive for your platform below
             2. Extract to your project directory
             3. Point your build system to the extracted files
             4. See the [sample project](https://github.com/${{ github.repository }}) for integration examples
-            
+
             ### Platforms Included
             - **Windows**: MSVC-compatible `.lib` files + `crashpad_handler.exe`
             - **macOS**: Universal `.a` files + `crashpad_handler`
             - **Linux**: GCC-compatible `.a` files + `crashpad_handler`
-            
+
             ### Directory Structure
             ```
             crashpad-<platform>/
@@ -275,23 +275,23 @@ jobs:
             │   └── mini_chromium/ # Mini Chromium headers
             └── build_info.txt     # Build metadata
             ```
-            
+
             ### Security Verification
             Verify downloads using the provided `.sha256` files:
             ```bash
             # Linux/macOS
             sha256sum -c crashpad-<platform>-*.tar.gz.sha256
-            
+
             # Windows PowerShell
             Get-FileHash crashpad-<platform>-*.tar.gz -Algorithm SHA256
             ```
-            
+
             ### Integration Tips
             - Use **debug** libraries during development for better crash reporting
             - Use **release** libraries for production builds
             - Ensure `crashpad_handler` is deployed alongside your application
             - See `build_info.txt` in each archive for detailed build information
-            
+
             ---
             **Build Details:**
             - **Build Date**: ${{ steps.current-date.outputs.date }}
